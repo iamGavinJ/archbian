@@ -1,0 +1,26 @@
+post_install() {
+  echo $1 - $2 - $3
+
+  if ! ln -sr /boot/vmlinuz-%KERNVER% /boot/Image 2>/dev/null; then
+    echo "WARNING: /boot is not compatible with symlinks. Renaming kernel."
+    mv -f /boot/vmlinuz-%KERNVER% /boot/Image
+  fi
+}
+
+post_upgrade() {
+  echo $1 - $2 - $3
+
+  if findmnt --fstab -uno SOURCE /boot &>/dev/null && ! mountpoint -q /boot; then
+    echo "WARNING: /boot appears to be a separate partition but is not mounted."
+  fi
+
+  if ! ln -sr /boot/vmlinuz-%KERNVER% /boot/Image 2>/dev/null; then
+    echo "WARNING: /boot is not compatible with symlinks. Renaming kernel."
+    mv -f /boot/vmlinuz-%KERNVER% /boot/Image
+  fi
+}
+
+post_remove() {
+  rm -f boot/initramfs-linux.img
+  rm -f boot/initramfs-linux-fallback.img
+}
